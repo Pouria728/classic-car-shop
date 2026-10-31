@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 <body>
   <header>
     <nav>
-      <h1>فروشگاه خودروهای اروپایی کلاسیک</h1>
+      <h1><a href="index.html" style="color: white; text-decoration: none;">فروشگاه خودروهای کلاسیک</a></h1>
       <a href="index.html">🏠 صفحه اصلی</a>
       <a href="cart.html">🛒 سبد خرید: <span id="cartCount">0</span></a>
     </nav>
@@ -22,7 +22,7 @@
       <input type="text" id="name" required><br><br>
 
       <label for="price">قیمت (تومان):</label>
-      <input type="number" id="price" required><br><br>
+      <input type="number" id="price" min="1" required><br><br>
 
       <label for="image">تصویر ماشین:</label>
       <input type="file" id="image" accept="image/*" required><br><br>
@@ -39,52 +39,30 @@
   </footer>
 
   <script src="products.js"></script>
+  <script src="catalog.js"></script>
   <script>
-    // Update cart count
-    function updateCartCount() {
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const count = cart.reduce((sum, item) => sum + item.qty, 0);
-      document.getElementById("cartCount").innerText = count;
-    }
-    updateCartCount();
+    updateCartBadge();
 
-    // Handle form submission
-    document.getElementById("addProductForm").addEventListener("submit", function(e) {
+    document.getElementById("addProductForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
       const name = document.getElementById("name").value;
-      const price = parseInt(document.getElementById("price").value);
+      const price = parseInt(document.getElementById("price").value, 10);
       const desc = document.getElementById("desc").value;
       const imageFile = document.getElementById("image").files[0];
 
-      if (imageFile) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const image = event.target.result; // base64
+      if (!imageFile) return;
 
-          // Get existing products from localStorage or default
-          let products = JSON.parse(localStorage.getItem("products")) || [];
-          if (products.length === 0) {
-            // Load from products.js if not in localStorage
-            products = window.products || [];
-          }
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const image = event.target.result; // base64
+        const newProduct = { id: nextProductId(), name, price, image, desc };
+        addExtraProduct(newProduct);
 
-          // Generate new ID
-          const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-
-          // Add new product
-          const newProduct = { id: newId, name, price, image, desc };
-          products.push(newProduct);
-
-          // Save to localStorage
-          localStorage.setItem("products", JSON.stringify(products));
-
-          alert("محصول جدید اضافه شد!");
-          // Redirect to index
-          window.location.href = "index.html";
-        };
-        reader.readAsDataURL(imageFile);
-      }
+        alert("محصول جدید اضافه شد!");
+        window.location.href = "index.html";
+      };
+      reader.readAsDataURL(imageFile);
     });
   </script>
 </body>

@@ -125,7 +125,7 @@ button:hover {
 }
 
 /* Cart styles */
-#cartList div {
+#cartList > div {
   display: flex;
   align-items: center;
   background-color: white;
@@ -141,6 +141,27 @@ button:hover {
   object-fit: cover;
   border-radius: 4px;
   margin-left: 1rem;
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 1rem;
+}
+
+.qty-controls button {
+  padding: 0.25rem 0.75rem;
+}
+
+#clearCartBtn {
+  display: block;
+  margin: 1.5rem auto 0;
+  background-color: #7f8c8d;
+}
+
+#clearCartBtn:hover {
+  background-color: #636e72;
 }
 
 #totalPrice {

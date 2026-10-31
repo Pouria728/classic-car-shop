@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +19,7 @@
     <h2>سبد خرید شما</h2>
     <div id="cartList"></div>
     <p id="totalPrice"></p>
+    <button id="clearCartBtn" style="display:none;">پاک کردن سبد خرید</button>
   </main>
 
   <footer>
@@ -26,41 +27,67 @@
   </footer>
 
   <script src="products.js"></script>
+  <script src="catalog.js"></script>
   <script>
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const cartList = document.getElementById("cartList");
+    function render() {
+      const cart = getCart();
+      const cartList = document.getElementById("cartList");
+      const clearBtn = document.getElementById("clearCartBtn");
+      let total = 0;
 
-    cartList.innerHTML = "";
-    let total = 0;
-
-    if (cart.length === 0) {
-      cartList.innerHTML = "<p>سبد خرید شما خالی است.</p>";
-    } else {
-      cart.forEach(p => {
-        total += p.price * p.qty;
-        cartList.innerHTML += `
-          <div>
-            <img src="${p.image}" alt="${p.name}">
+      if (cart.length === 0) {
+        cartList.innerHTML = '<p>سبد خرید شما خالی است. <a href="index.html">بازگشت به فروشگاه</a></p>';
+        clearBtn.style.display = "none";
+      } else {
+        cartList.innerHTML = cart.map((p) => {
+          total += p.price * p.qty;
+          return `
             <div>
-              <b>${p.name}</b><br>
-              ${p.desc}<br>
-              تعداد: ${p.qty}<br>
-              قیمت: ${(p.price * p.qty).toLocaleString()} تومان
+              <img src="${p.image}" alt="${p.name}">
+              <div>
+                <b>${p.name}</b><br>
+                ${p.desc}<br>
+                قیمت واحد: ${p.price.toLocaleString()} تومان<br>
+                قیمت کل: ${(p.price * p.qty).toLocaleString()} تومان
+              </div>
+              <div class="qty-controls">
+                <button onclick="changeQty(${p.id}, -1)">-</button>
+                <span>${p.qty}</span>
+                <button onclick="changeQty(${p.id}, 1)">+</button>
+              </div>
+              <button onclick="removeFromCart(${p.id})">حذف</button>
             </div>
-            <button onclick="removeFromCart(${p.id})">حذف</button>
-          </div>
-        `;
-      });
+          `;
+        }).join("");
+        clearBtn.style.display = "inline-block";
+      }
+
+      document.getElementById("totalPrice").innerText = "جمع کل: " + total.toLocaleString() + " تومان";
+      updateCartBadge();
     }
 
-    document.getElementById("totalPrice").innerText = "جمع کل: " + total.toLocaleString() + " تومان";
+    function changeQty(id, delta) {
+      const cart = getCart();
+      const item = cart.find((p) => p.id == id);
+      if (!item) return;
+
+      item.qty += delta;
+      const newCart = item.qty <= 0 ? cart.filter((p) => p.id != id) : cart;
+      saveCart(newCart);
+      render();
+    }
 
     function removeFromCart(id) {
-      cart = cart.filter(p => p.id != id);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      location.reload();
+      saveCart(getCart().filter((p) => p.id != id));
+      render();
     }
-  </script>
 
+    document.getElementById("clearCartBtn").addEventListener("click", () => {
+      saveCart([]);
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جزئیات محصول</title>
+  <title>فروشگاه خودروهای کلاسیک</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,16 +11,13 @@
     <nav>
       <h1><a href="index.html" style="color: white; text-decoration: none;">فروشگاه خودروهای کلاسیک</a></h1>
       <a href="add-product.html">➕ اضافه کردن محصول</a>
-      <a href="cart.html">🛒 سبد خرید</a>
+      <a href="cart.html">🛒 سبد خرید: <span id="cartCount">0</span></a>
     </nav>
   </header>
 
-  <main id="productDetail">
-    <img id="productImage" alt="">
-    <h1 id="name"></h1>
-    <p id="desc"></p>
-    <p id="price"></p>
-    <button onclick="addToCart()">افزودن به سبد خرید</button>
+  <main>
+    <h2>خودروهای موجود</h2>
+    <div id="productList"></div>
   </main>
 
   <footer>
@@ -28,33 +25,26 @@
   </footer>
 
   <script src="products.js"></script>
+  <script src="catalog.js"></script>
   <script>
-    // Load products from localStorage or default
-    let products = JSON.parse(localStorage.getItem("products")) || window.products || [];
+    const productList = document.getElementById("productList");
+    const allProducts = getAllProducts();
 
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get("id");
-    const product = products.find(p => p.id == productId);
-
-    document.getElementById("name").innerText = product.name;
-    document.getElementById("desc").innerText = product.desc;
-    document.getElementById("price").innerText = "قیمت: " + product.price.toLocaleString() + " تومان";
-
-    const img = document.getElementById("productImage");
-    img.src = product.image;
-    img.alt = product.name;
-
-    function addToCart() {
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      let item = cart.find(p => p.id == productId);
-
-      if (item) item.qty++;
-      else cart.push({ ...product, qty: 1 });
-
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert("به سبد خرید اضافه شد");
+    if (allProducts.length === 0) {
+      productList.innerHTML = "<p>در حال حاضر هیچ خودرویی ثبت نشده است.</p>";
+    } else {
+      productList.innerHTML = allProducts.map((p) => `
+        <div class="product">
+          <img src="${p.image}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <p><b>${p.price.toLocaleString()} تومان</b></p>
+          <a href="product.html?id=${p.id}">مشاهده و خرید</a>
+        </div>
+      `).join("");
     }
-  </script>
 
+    updateCartBadge();
+  </script>
 </body>
 </html>

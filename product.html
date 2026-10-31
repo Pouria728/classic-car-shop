@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +10,23 @@
   <header>
     <nav>
       <h1><a href="index.html" style="color: white; text-decoration: none;">فروشگاه خودروهای کلاسیک</a></h1>
-      <a href="cart.html">🛒 سبد خرید</a>
+      <a href="add-product.html">➕ اضافه کردن محصول</a>
+      <a href="cart.html">🛒 سبد خرید: <span id="cartCount">0</span></a>
     </nav>
   </header>
 
   <main id="productDetail">
-    <img id="productImage" alt="">
-    <h1 id="name"></h1>
-    <p id="desc"></p>
-    <p id="price"></p>
-    <button onclick="addToCart()">افزودن به سبد خرید</button>
+    <div id="notFound" style="display:none; text-align:center;">
+      <p>این محصول پیدا نشد.</p>
+      <a href="index.html">بازگشت به فروشگاه</a>
+    </div>
+    <div id="found" style="display:none;">
+      <img id="productImage" alt="">
+      <h1 id="name"></h1>
+      <p id="desc"></p>
+      <p id="price"></p>
+      <button id="addToCartBtn">افزودن به سبد خرید</button>
+    </div>
   </main>
 
   <footer>
@@ -27,30 +34,28 @@
   </footer>
 
   <script src="products.js"></script>
+  <script src="catalog.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
     const productId = params.get("id");
-    const product = products.find(p => p.id == productId);
+    const product = getAllProducts().find((p) => p.id == productId);
 
-    document.getElementById("name").innerText = product.name;
-    document.getElementById("desc").innerText = product.desc;
-    document.getElementById("price").innerText = "قیمت: " + product.price.toLocaleString() + " تومان";
+    if (!product) {
+      document.getElementById("notFound").style.display = "block";
+    } else {
+      document.getElementById("found").style.display = "block";
+      document.getElementById("name").innerText = product.name;
+      document.getElementById("desc").innerText = product.desc;
+      document.getElementById("price").innerText = "قیمت: " + product.price.toLocaleString() + " تومان";
 
-    const img = document.getElementById("productImage");
-    img.src = product.image;
-    img.alt = product.name;
+      const img = document.getElementById("productImage");
+      img.src = product.image;
+      img.alt = product.name;
 
-    function addToCart() {
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      let item = cart.find(p => p.id == productId);
-
-      if (item) item.qty++;
-      else cart.push({ ...product, qty: 1 });
-
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert("به سبد خرید اضافه شد");
+      document.getElementById("addToCartBtn").addEventListener("click", () => addToCart(productId));
     }
-  </script>
 
+    updateCartBadge();
+  </script>
 </body>
 </html>
